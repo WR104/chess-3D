@@ -1,12 +1,61 @@
 body {
     color: white;
-    margin: 0;
-    display: flex;
-    align-items: center;
     height: 100vh;
-    background: radial-gradient(circle at center, rgb(100, 100, 100) 0%, rgb(80, 80, 80) 20%, rgb(60, 60, 60) 40%, rgb(40, 40, 40) 60%, rgb(20, 20, 20) 80%, rgb(0, 0, 0) 100%);
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    margin: 0 !important;
+}
+
+/* Menu panel CSS */
+#menu {
+    /* Cover the entire screen */
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    z-index: 2;
+    background-color: #303030;
+    text-align: center;
+    padding: 0;
+}
+
+.menuBackground {
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    background: radial-gradient(rgba(0, 0, 0, 0.20), #000000) no-repeat center;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.BackgroundImage {
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    /* Background kind piece */
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/bQ.svg") no-repeat center;
+    background-size: auto 100%;
+    animation: spin 40s linear infinite;
+    z-index: -1;
+    filter: opacity(15%);
+}
+
+.menuContainer {
+    padding: 0 2vw;
+}
+
+.modeContainer label {
+    margin-bottom: 10px;
+    display: block;
+}
+
+.modeContainer label table {
+    width: 100%;
+}
+
+.modeContainer label table td {
+    padding: 5px;
+}
+
+td>p {
+    margin: 0.1em;
 }
 
 .board-container {
@@ -17,6 +66,62 @@ body {
     display: block;
 }
 
+.menuContent {
+    width: 20vw;
+    height: 50vh;
+    margin: 25vh auto;
+    padding: 3vh;
+    position: relative;
+    z-index: 2;
+}
+
+h4 {
+    font-weight: 300;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Welcome menu play/rule button CSS */
+.menuButton {
+    margin-top: 30px;
+    padding: 0.6em 1.8em;
+    background-color: #292929;
+    border: 0;
+    color: #FFFFFF;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.15s ease-out;
+    font-size: 1.2rem;
+    display: block;
+}
+
+.menuButton:hover {
+    cursor: pointer;
+    color: #292929;
+    background-color: #E6E6E6;
+}
+
+/* Spinning king animation */
+@keyframes spin {
+    0% {
+        -webkit-transform: rotateY(-15deg) rotateX(50deg) rotateZ(31deg);
+        transform: rotateY(-15deg) rotateX(50deg) rotateZ(31deg);
+    }
+
+    100% {
+        -webkit-transform: rotateY(345deg) rotateX(770deg) rotateZ(1111deg);
+        transform: rotateY(345deg) rotateX(770deg) rotateZ(1111deg);
+    }
+}
+
+.board-container {
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(64, 64, 64, 1) 48%, rgba(0, 0, 0, 1) 100%);
+    top: 0;
+    position: fixed;
+}
+
 .board {
     display: inherit;
     border: solid 10px #242424;
@@ -24,7 +129,94 @@ body {
     font-size: 0px;
     margin-left: 0%;
     box-shadow: 5px 9px 8px -1px rgba(0, 0, 0, 0.57);
-    background-color: black;
+    transition: 0.2s;
+    opacity: 0;
+}
+
+/* Apply the animation to each board individually with delay */
+.board:nth-child(1) {
+    animation: comeFromTopLeft 0.5s ease 0s 1 normal forwards running;
+}
+
+.board:nth-child(2) {
+    animation: comeFromTopRight 0.5s ease 0.2s 1 normal forwards running;
+}
+
+.board:nth-child(3) {
+    animation: comeFromBottomLeft 0.5s ease 0.4s 1 normal forwards running;
+}
+
+.board:nth-child(4) {
+    animation: comeFromBottomRight 0.5s ease 0.6s 1 normal forwards running;
+}
+
+.board:nth-child(5) {
+    animation: comeFromTopLeft 0.5s ease 0.8s 1 normal forwards running;
+}
+
+/* Animations for transition between welcome screen and game board */
+@keyframes comeFromTopLeft {
+    0% {
+        margin-top: -100%;
+        margin-left: -100%;
+        opacity: 0;
+    }
+    100% {
+        margin-top: 0;
+        margin-left: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes comeFromTopRight {
+    0% {
+        margin-top: -100%;
+        margin-left: 100%;
+        opacity: 0;
+    }
+    100% {
+        margin-top: 0;
+        margin-left: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes comeFromBottomLeft {
+    0% {
+        margin-top: 100%;
+        margin-left: -100%;
+        opacity: 0;
+    }
+    100% {
+        margin-top: 0;
+        margin-left: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes comeFromBottomRight {
+    0% {
+        margin-top: 100%;
+        margin-left: 100%;
+        opacity: 0;
+    }
+    100% {
+        margin-top: 0;
+        margin-left: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+        width: 95%;
+        height: 95%;
+    }
 }
 
 .square {
@@ -43,4 +235,88 @@ body {
 
 .lightSq {
     background-color: rgb(250, 212, 164);
+}
+
+
+
+/* Radio Buttons CSS */
+[type=radio] {
+    /* Hide the actual radio button, replaced with the pictures */
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Set the cursor to point on the image */
+[type=radio]+img {
+    cursor: pointer;
+}
+
+#rad0 {
+    width: 2vw;
+    height: 2vw;
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/bN.svg") no-repeat center;
+    background-size: 100%;
+    transition: all 0.15s ease-out;
+}
+
+#rad0:hover {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wN.svg") no-repeat center;
+    background-size: 100%;
+    cursor: pointer;
+}
+
+[type=radio]:checked+#rad0 {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wN.svg") no-repeat center;
+    background-size: 100%;
+}
+
+#rad1 {
+    width: 2vw;
+    height: 2vw;
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/bR.svg") no-repeat center;
+    background-size: 100%;
+    transition: all 0.15s ease-out;
+}
+
+#rad1:hover {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wR.svg") no-repeat center;
+    background-size: 100%;
+    cursor: pointer;
+}
+
+[type=radio]:checked+#rad1 {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wR.svg") no-repeat center;
+    background-size: 100%;
+}
+
+#rad2 {
+    width: 2vw;
+    height: 2vw;
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/bQ.svg") no-repeat center;
+    background-size: 100%;
+    transition: all 0.15s ease-out;
+}
+
+#rad2:hover {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wQ.svg") no-repeat center;
+    background-size: 100%;
+    cursor: pointer;
+}
+
+[type=radio]:checked+#rad2 {
+    background: url("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/wQ.svg") no-repeat center;
+    background-size: 100%;
+}
+
+
+
+
+
+@media only screen and (max-width: 600px) {
+    #rule {
+        display: none;
+    }
+
 }
