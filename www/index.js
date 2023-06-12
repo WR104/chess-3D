@@ -1,0 +1,1 @@
+const wasm = import("chess3d");
