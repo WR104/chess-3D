@@ -3,6 +3,9 @@ extern crate web_sys;
 
 mod utils;
 mod interface;
+mod piece;
+mod position;
+mod color;
 
 use wasm_bindgen::prelude::*;
 use interface::*;
