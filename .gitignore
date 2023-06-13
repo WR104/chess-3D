@@ -3,5 +3,6 @@
 Cargo.lock
 
 .idea
+.vscode
 www/package-lock.json
 www/dist
