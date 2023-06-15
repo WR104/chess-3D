@@ -161,6 +161,7 @@ h4 {
         margin-left: -100%;
         opacity: 0;
     }
+
     100% {
         margin-top: 0;
         margin-left: 0;
@@ -174,6 +175,7 @@ h4 {
         margin-left: 100%;
         opacity: 0;
     }
+
     100% {
         margin-top: 0;
         margin-left: 0;
@@ -187,6 +189,7 @@ h4 {
         margin-left: -100%;
         opacity: 0;
     }
+
     100% {
         margin-top: 0;
         margin-left: 0;
@@ -200,6 +203,7 @@ h4 {
         margin-left: 100%;
         opacity: 0;
     }
+
     100% {
         margin-top: 0;
         margin-left: 0;
@@ -237,6 +241,27 @@ h4 {
     background-color: rgb(250, 212, 164);
 }
 
+/* Piece images */
+.piece {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 95%;
+    height: 95%;
+    z-index: 3;
+
+    /* Disable highlight on image */
+    -khtml-user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Apply visual effect filters (blur(0) is to sharpen the pictures) */
+    filter: blur(0) drop-shadow(2px 2px 2px rgba(34, 34, 34, 0.527));
+    /* Apply transformations for 3D perspective */
+    transform: translate(-75%, -90%) rotateX(52deg) rotateZ(5deg) skew(22deg) scale3d(1.0, 3.0, 1.0);
+    -webkit-transform: translate(-75%, -90%) rotateX(52deg) rotateZ(5deg) skew(22deg) scale3d(1.0, 3.0, 1.0);
+}
 
 
 /* Radio Buttons CSS */
