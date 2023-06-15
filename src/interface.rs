@@ -5,7 +5,10 @@ use std::sync::mpsc;
 use futures::channel::oneshot;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use wasm_bindgen_futures::{future_to_promise, JsFuture};
-use web_sys::{window, Element, Event, HtmlElement, HtmlInputElement};
+use web_sys::{window, Element, Event, HtmlElement, HtmlInputElement, HtmlImageElement};
+
+use crate::color::*;
+use crate::board::Board;
 
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -176,5 +179,63 @@ pub fn create_boards() {
                 ),
             )
             .unwrap();
+    }
+}
+
+pub fn create_piece_image(id: &str) -> HtmlImageElement {
+    let window = window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let img = document
+        .create_element("img")
+        .expect("failed to create element")
+        .dyn_into::<HtmlImageElement>()
+        .expect("failed to cast element");
+    img.set_src(&format!("https://raw.githubusercontent.com/WR104/chess-3D/main/www/img/{}.svg", id));
+    img
+}
+
+pub fn update_board(board: &Board, initial: bool) {
+    let window = window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let squares = document.get_elements_by_class_name("square");
+    let mut delay: f64 = 1.33;  // delay of antimation fadeIn for initial update
+
+    for (i, square) in board.squares().iter().enumerate() {
+        let square_element = squares
+            .item(i as u32)
+            .expect("should have a square element")
+            .dyn_into::<Element>()
+            .expect("failed to cast element");
+
+        while let Some(child) = square_element.first_child() {
+            square_element
+                .remove_child(&child)
+                .expect("failed to remvoe child");
+        }
+
+        if let Some(piece) = square.get_piece() {
+            let chess_color = match piece.get_color() {
+                WHITE => "w",
+                BLACK => "b",
+            };
+
+            let chess_type = piece.get_type();
+            let chess_id = format!("{}{}", chess_color, chess_type);
+            let img = create_piece_image(&chess_id);
+            img
+                .set_attribute("class", "piece")
+                .expect("failed to set class attribute");
+
+            // If this is the frist time, then apply fadeIn animation for each piece
+            if initial {
+                img.style()
+                    .set_property("animation", &format!("fadeIn 1s ease {}s both", delay))
+                    .expect("failed to set animation property");
+                delay += 0.1; 
+            }
+            square_element
+                .append_child(&img)
+                .expect("failed to append child");
+        }
     }
 }

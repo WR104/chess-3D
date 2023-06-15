@@ -1,4 +1,4 @@
-use crate::color::Color;
+use crate::color::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Position {
@@ -76,6 +76,10 @@ impl Position {
 
     pub fn get_lvl(&self) -> i32 {
         self.lvl
+    }
+
+    pub fn get_all(&self) -> (i32, i32, i32) {
+        (self.row, self.col, self.lvl)
     }
 
     // Return the distance between row, column, and level
@@ -182,15 +186,15 @@ impl Position {
         Self::new(self.row - 1, self.col, self.lvl)
     }
 
-    fn next_font(&self) -> Self {
+    fn next_front(&self) -> Self {
         Self::new(self.row + 1, self.col, self.lvl)
     }
 
-    fn next_left(&self) -> Self {
+    pub fn next_left(&self) -> Self {
         Self::new(self.row, self.col - 1, self.lvl)
     }
 
-    fn next_right(&self) -> Self {
+    pub fn next_right(&self) -> Self {
         Self::new(self.row, self.col + 1, self.lvl)
     }
 
@@ -262,5 +266,13 @@ impl Position {
         }
 
         result
+    }
+
+    pub fn is_knight_move(&self, other: Position) -> bool {
+        todo!()
+    }
+
+    pub fn is_unicorn_move(&self, other: Position) -> bool {
+        todo!()
     }
 }
