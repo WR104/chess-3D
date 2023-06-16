@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chess</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="menu">
+        <div class="menuBackground">
+            <div class="BackgroundImage"></div>
+        </div>
+        <div class="menuContent">
+            <h1 style="text-align: center; margin-bottom: 0;">Chess-3D</h1>
+            <h4 style="text-align: center; margin-top: 0;">RAUMSCHACH VARIANT</h4>
+            <h3 style="text-align:center; margin-bottom: 0">Game Mode</h3>
+
+            <div class="modeContainer">
+                <!-- Easy CPU -->
+                <label>
+                    <table>
+                        <tr>
+                            <td>
+                                <input id="easy" type="radio" name="difficulty" value="1" checked>
+                                <div id="rad0"></div>
+                            </td>
+                            <td style="padding:0;">
+                                <h4>Player vs. Computer (Easy)</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </label>
+                <!-- Normal CPU -->
+                <label>
+                    <table>
+                        <tr>
+                            <td>
+                                <input id="normal" type="radio" name="difficulty" value="2">
+                                <div id="rad1"></div>
+                            </td>
+                            <td style="padding:0;">
+                                <h4>Player vs. Computer (Normal)</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </label>
+                <!-- Hard CPU -->
+                <label>
+                    <table>
+                        <tr>
+                            <td>
+                                <input id="hard" type="radio" name="difficulty" value="3">
+                                <div id="rad2"></div>
+                            </td>
+                            <td style="padding:0;">
+                                <h4>Player vs. Computer (Hard)</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </label>
+            </div>
+
+            <center style="margin-top: 4vh;">
+            <table>
+                <tr>
+                    <td><a class="menuButton" id="submitButton">Play&nbsp ▶</a></td>
+                    <td><a class="menuButton" id="rule" href="https://www.chessvariants.com/3d.dir/3d5.html">&nbsp Rules &nbsp</a></td>
+                </tr>
+            </table></center>
+        </div>
+    </div>
+    <center>
+        <div class="board-container">
+        </div>
+    </center>
+    <script src="./bootstrap.js"></script>
+</body>
+
+</html>
