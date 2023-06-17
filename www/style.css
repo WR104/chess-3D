@@ -233,12 +233,24 @@ h4 {
     position: relative;
 }
 
+.square:hover {
+    background-color: #ec5440;
+}
+
 .darkSq {
     background-color: rgb(221, 169, 115);
 }
 
 .lightSq {
     background-color: rgb(250, 212, 164);
+}
+
+.hint {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.568);
+    pointer-events: none;
 }
 
 /* Piece images */
