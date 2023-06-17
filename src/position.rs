@@ -133,6 +133,7 @@ impl Position {
         if dlvl == 0 {
             drow == 0 || dcol == 0
         } else {
+            // is diagonal to in 3d
             drow == 0 && dcol == 0
         }
     }
@@ -182,11 +183,11 @@ impl Position {
     }
 
     // The next_direction function might return invalid position
-    fn next_back(&self) -> Self {
+    pub fn next_back(&self) -> Self {
         Self::new(self.row - 1, self.col, self.lvl)
     }
 
-    fn next_front(&self) -> Self {
+    pub fn next_front(&self) -> Self {
         Self::new(self.row + 1, self.col, self.lvl)
     }
 
@@ -198,12 +199,34 @@ impl Position {
         Self::new(self.row, self.col + 1, self.lvl)
     }
 
-    fn next_below(&self) -> Self {
+    pub fn next_down(&self) -> Self {
         Self::new(self.row, self.col, self.lvl - 1)
     }
 
-    fn next_above(&self) -> Self {
+    pub fn next_up(&self) -> Self {
         Self::new(self.row, self.col, self.lvl + 1)
+    }
+
+    // dlvl: the change in level
+    // drow: the change in row
+    // dcol: the change in column
+    // Might return invalid position
+    pub fn next_by(&self, drow: i32, dcol: i32, dlvl: i32) -> Self {
+        Self::new(self.row + drow, self.col + dcol, self.lvl + dlvl)
+    }
+
+    pub fn pawn_forward(&self, ally_color: Color) -> Self {
+        match ally_color {
+            WHITE => self.next_front(),
+            BLACK => self.next_back(),
+        }
+    }
+
+    pub fn pawn_vertical(&self, ally_color: Color) -> Self {
+        match ally_color {
+            WHITE => self.next_up(),
+            BLACK => self.next_down(),
+        }
     }
 
     // Get the list of diagonal positions between "from" and "to"
@@ -225,8 +248,10 @@ impl Position {
                 acc = acc.add_row(row_step).add_col(col_step);
             } else if drow == 0 {
                 acc = acc.add_col(col_step).add_lvl(lvl_step);
-            } else {
+            } else if dcol == 0{
                 acc = acc.add_row(row_step).add_lvl(lvl_step);
+            } else {
+                acc = acc.add_row(row_step).add_col(col_step).add_lvl(lvl_step);
             }
             result.push(acc);
         }
@@ -268,11 +293,22 @@ impl Position {
         result
     }
 
+    // Whether the move from the current position to the other position
+    // is a valid knight move
     pub fn is_knight_move(&self, other: Position) -> bool {
-        todo!()
+        let (drow, dcol, dlvl) = self.get_distance(other);
+
+        (drow == 2 && dcol == 1 && dlvl == 0)
+        || (drow == 1 && dcol == 2 && dlvl == 0)
+        || (drow == 2 && dlvl == 1 && dcol == 0)
+        || (drow == 1 && dlvl == 2 && dcol == 0)
+        || (dlvl == 2 && dcol == 1 && drow == 0)
+        || (dlvl == 1 && dcol == 2 && drow == 0)
     }
 
     pub fn is_unicorn_move(&self, other: Position) -> bool {
-        todo!()
+        let (drow, dcol, dlvl) = self.get_distance(other);
+
+        drow == dcol && dcol == dlvl
     }
 }

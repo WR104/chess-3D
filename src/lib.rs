@@ -8,6 +8,8 @@ mod position;
 mod color;
 mod square;
 mod board;
+mod moves;
+mod weights;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -38,7 +40,9 @@ pub async fn run() -> Result<(), JsValue> {
     log!("d: {}" ,difficulty);
     create_boards();
 
-    update_board(&board.borrow(), true);
+    update_board(&board.borrow(), false);
+    
+    render_loop(Rc::clone(&board));
     Ok(())
 }
 
