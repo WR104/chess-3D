@@ -1,8 +1,8 @@
 use crate::board::Board;
-use crate::color::*;
 use crate::moves::Move;
 use crate::position::Position;
 use crate::weights::*;
+use crate::color::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Piece {
@@ -32,7 +32,7 @@ impl Piece {
         match self {
             Self::King(_, _) => 9999,
             Self::Queen(_, _) => 9,
-            Self::Unicorn(_, _) => 2,
+            Self::Unicorn(_, _) => 5,
             Self::Rook(_, _) => 5,
             Self::Bishop(_, _) => 3,
             Self::Knight(_, _) => 3,
@@ -41,14 +41,13 @@ impl Piece {
     }
 
     pub fn get_weighted_value(&self) -> f64 {
-
         // Get the corresponding one for the given color piece
         fn mirror_weights(white_weights: &[[[f64; 5]; 5]; 5]) -> [[[f64; 5]; 5]; 5] {
             let mut black_weights = [[[0.0; 5]; 5]; 5];
             for x in 0..5 {
                 for y in 0..5 {
                     for z in 0..5 {
-                        black_weights[x][y][z] = white_weights[4 -x][4 - y][4 - z];
+                        black_weights[x][y][z] = white_weights[4 - x][4 - y][4 - z];
                     }
                 }
             }
@@ -57,39 +56,39 @@ impl Piece {
 
         let weights = match self {
             Self::King(c, _) => match *c {
-               WHITE => WHITE_KING_POSITION_WEIGHTS,
-               BLACK => BLACK_KING_POSITION_WEIGHTS,    //mirror_weights(&WHITE_KING_POSITION_WEIGHTS) 
-            }
+                WHITE => WHITE_KING_POSITION_WEIGHTS,
+                BLACK => BLACK_KING_POSITION_WEIGHTS, //mirror_weights(&WHITE_KING_POSITION_WEIGHTS)
+            },
 
             Self::Queen(c, _) => match *c {
                 WHITE => WHITE_QUEEN_POSITION_WEIGHTS,
                 BLACK => mirror_weights(&WHITE_QUEEN_POSITION_WEIGHTS),
-            }
+            },
 
             Self::Unicorn(c, _) => match *c {
                 WHITE => WHITE_UNICORN_POSITION_WEIGHTS,
                 BLACK => mirror_weights(&WHITE_UNICORN_POSITION_WEIGHTS),
-            }
+            },
 
             Self::Rook(c, _) => match *c {
                 WHITE => WHITE_ROOK_POSITION_WEIGHTS,
                 BLACK => mirror_weights(&WHITE_ROOK_POSITION_WEIGHTS),
-            }
+            },
 
             Self::Bishop(c, _) => match *c {
                 WHITE => WHITE_BISHOP_POSITION_WEIGHTS,
                 BLACK => mirror_weights(&WHITE_BISHOP_POSITION_WEIGHTS),
-            }
+            },
 
             Self::Knight(c, _) => match *c {
                 WHITE => WHITE_KNIGHT_POSITION_WEIGHTS,
-                BLACK => mirror_weights(&WHITE_KNIGHT_POSITION_WEIGHTS)
-            }
+                BLACK => mirror_weights(&WHITE_KNIGHT_POSITION_WEIGHTS),
+            },
 
             Self::Pawn(c, _) => match *c {
                 WHITE => WHITE_PAWN_POSITION_WEIGHTS,
                 BLACK => mirror_weights(&WHITE_PAWN_POSITION_WEIGHTS),
-            }
+            },
         };
 
         let (row, col, lvl) = self.get_pos().get_all();
@@ -184,10 +183,15 @@ impl Piece {
             Self::Pawn(ally_color, pos) => {
                 let frontward = pos.pawn_forward(ally_color);
                 let upward = pos.pawn_vertical(ally_color);
+                let (row, _, lvl) = self.get_pos().get_all();
 
                 for new_pos in &[frontward, upward] {
                     if new_pos.is_on_board() && !board.has_piece(*new_pos) {
-                        result.push(Move::Piece(pos, *new_pos));
+                        if lvl == 4 && row == 4 || lvl == 0 && row == 0 {
+                            result.push(Move::Promotion(pos, *new_pos, Piece::Queen(self.get_color(), *new_pos)));
+                        } else {
+                            result.push(Move::Piece(pos, *new_pos));
+                        }
                     }
                 }
 
@@ -197,8 +201,12 @@ impl Piece {
                     upward.next_left(),
                     upward.next_right(),
                 ] {
-                    if new_pos.is_on_board() && board.has_enemy_piece(*new_pos, ally_color) {
-                        result.push(Move::Piece(pos, *new_pos));
+                    if new_pos.is_on_board() && !board.has_piece(*new_pos) {
+                        if lvl == 4 && row == 4 || lvl == 0 && row == 0 {
+                            result.push(Move::Promotion(pos, *new_pos, Piece::Queen(self.get_color(), *new_pos)));
+                        } else {
+                            result.push(Move::Piece(pos, *new_pos));
+                        }
                     }
                 }
             }
@@ -248,30 +256,22 @@ impl Piece {
             Self::Unicorn(ally_color, pos) => {
                 for dlvl in -4..=4 {
                     let new_pos = pos.next_by(dlvl, dlvl, dlvl);
-                    if new_pos.is_on_board()
-                        && !board.has_ally_piece(new_pos, ally_color)
-                    {
+                    if new_pos.is_on_board() && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
 
                     let new_pos = pos.next_by(dlvl, dlvl, -dlvl);
-                    if new_pos.is_on_board()
-                        && !board.has_ally_piece(new_pos, ally_color)
-                    {
+                    if new_pos.is_on_board() && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
 
                     let new_pos = pos.next_by(dlvl, -dlvl, dlvl);
-                    if new_pos.is_on_board()
-                        && !board.has_ally_piece(new_pos, ally_color)
-                    {
+                    if new_pos.is_on_board() && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
 
                     let new_pos = pos.next_by(dlvl, -dlvl, -dlvl);
-                    if new_pos.is_on_board()
-                        && !board.has_ally_piece(new_pos, ally_color)
-                    {
+                    if new_pos.is_on_board() && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
                 }
@@ -303,7 +303,7 @@ impl Piece {
                     }
                 }
                 for col in 0..5 {
-                    let new_pos = Position::new(pos.get_row(), col, pos.get_lvl(), );
+                    let new_pos = Position::new(pos.get_row(), col, pos.get_lvl());
                     if new_pos != pos && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
@@ -354,7 +354,7 @@ impl Piece {
                                 && (dlvl.abs() == 2 || drow.abs() == 2 || dcol.abs() == 2)
                             {
                                 let new_pos = pos.next_by(drow, dcol, dlvl);
-                                if new_pos.is_on_board() 
+                                if new_pos.is_on_board()
                                     && !board.has_ally_piece(new_pos, ally_color)
                                 {
                                     result.push(Move::Piece(pos, new_pos));
@@ -367,7 +367,7 @@ impl Piece {
         }
 
         let color = self.get_color();
-        result 
+        result
             .into_iter()
             .filter(|x| match x {
                 Move::Piece(from, to) | Move::Promotion(from, to, _) => {
@@ -376,14 +376,12 @@ impl Piece {
                 Move::Resign => board.is_legal_move(*x, color),
             })
             .collect::<Vec<Move>>()
-
     }
 
-
     // Verify that moving to a new position is a legal move
-    pub(crate) fn is_legal_move(&self, new_pos: Position, board: &Board) -> bool{
+    pub(crate) fn is_legal_move(&self, new_pos: Position, board: &Board) -> bool {
         if board.has_ally_piece(new_pos, self.get_color()) || !new_pos.is_on_board() {
-            return  false;
+            return false;
         }
 
         match *self {
@@ -424,12 +422,11 @@ impl Piece {
                             return false;
                         }
                     }
-
                     true
                 } else {
                     false
                 }
-            },
+            }
             Piece::Knight(_, pos) => pos.is_knight_move(new_pos),
             Piece::Bishop(_, pos) => {
                 if pos.is_diagonal_to(new_pos) {
@@ -445,17 +442,19 @@ impl Piece {
                 } else {
                     false
                 }
-            },
+            }
             Piece::Pawn(ally_color, pos) => {
                 let front = pos.pawn_forward(ally_color);
                 let vertical = pos.pawn_vertical(ally_color);
                 (board.has_enemy_piece(new_pos, ally_color) && new_pos == front.next_left())
-                || (board.has_enemy_piece(new_pos, ally_color) && new_pos == front.next_right())
-                || (!board.has_piece(new_pos) && new_pos == front)
-                || (board.has_enemy_piece(new_pos, ally_color) && new_pos == vertical.next_left())
-                || (board.has_enemy_piece(new_pos, ally_color) && new_pos == vertical.next_right())
-                || (!board.has_piece(new_pos) && new_pos == vertical)
-            },
+                    || (board.has_enemy_piece(new_pos, ally_color) && new_pos == front.next_right())
+                    || (!board.has_piece(new_pos) && new_pos == front)
+                    || (board.has_enemy_piece(new_pos, ally_color)
+                        && new_pos == vertical.next_left())
+                    || (board.has_enemy_piece(new_pos, ally_color)
+                        && new_pos == vertical.next_right())
+                    || (!board.has_piece(new_pos) && new_pos == vertical)
+            }
         }
     }
 }

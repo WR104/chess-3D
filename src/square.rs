@@ -16,10 +16,6 @@ impl From<Piece> for Square {
 }
 
 impl Square {
-    pub fn is_empty(&self) -> bool {
-        self.piece == None
-    }
-
     pub fn get_piece(&self) -> Option<Piece> {
         self.piece
     }

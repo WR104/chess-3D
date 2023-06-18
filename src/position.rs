@@ -113,8 +113,12 @@ impl Position {
         let (drow, dcol, dlvl) = self.get_distance(other);
         if dlvl == 0 {
             drow == dcol
+        } else if drow == 0{
+            dcol == dlvl
+        } else if dcol == 0 {
+            drow == dlvl
         } else {
-            (drow == 0 && dcol == dlvl) || (dcol == 0 && drow == dlvl)
+            drow == dcol && dcol == dlvl
         }
     }
 
@@ -270,11 +274,11 @@ impl Position {
         let mut lvl_step = 0;
         if self.at_back_of(to) {
             row_step = 1;
-        } else if self.at_left_of(to) {
+        } else if self.at_front_of(to) {
             row_step = -1;
         } else if self.at_left_of(to) {
             col_step = 1;
-        } else if self.at_left_of(to) {
+        } else if self.at_right_of(to) {
             col_step = -1;
         } else if self.at_bottom_of(to) {
             lvl_step = 1;

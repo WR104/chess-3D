@@ -148,7 +148,7 @@ impl Board {
         }
     }
 
-    pub fn rating_value(&self, len: usize) -> f64 {
+    pub fn rating_value(&self) -> f64 {
         todo!()
     }
 

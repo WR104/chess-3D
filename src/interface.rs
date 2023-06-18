@@ -1,10 +1,8 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::sync::mpsc;
 
-use futures::channel::oneshot;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
 use web_sys::{
     window, Element, Event, HtmlElement, HtmlImageElement, HtmlInputElement, MouseEvent,
 };
@@ -240,6 +238,14 @@ pub fn update_board(board: &Board, initial: bool) {
             img.set_attribute("class", "piece")
                 .expect("failed to set class attribute");
 
+            if chess_id == "wK" && PLAYERCOLOR == WHITE 
+                || chess_id == "bK" && PLAYERCOLOR == BLACK {
+                if board.is_in_check(PLAYERCOLOR) {
+                    img.set_attribute("id", "checked")
+                        .expect("failed to set id attribute");
+                }
+            }
+
             // If this is the frist time, then apply fadeIn animation for each piece
             if initial {
                 img.style()
@@ -247,6 +253,7 @@ pub fn update_board(board: &Board, initial: bool) {
                     .expect("failed to set animation property");
                 delay += 0.1;
             }
+            
             square_element
                 .append_child(&img)
                 .expect("failed to append child");
