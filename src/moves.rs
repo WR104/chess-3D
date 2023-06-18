@@ -147,3 +147,8 @@ pub trait Evaluate: Sized {
         best_move_value
     }
 }
+
+pub fn get_next_move(b: &Board, depth: i32) -> Move {
+    let (m, _, _) = b.get_best_next_move(depth);
+    m
+}

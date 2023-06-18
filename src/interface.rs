@@ -4,14 +4,15 @@ use std::sync::mpsc;
 
 use futures::channel::oneshot;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{
     window, Element, Event, HtmlElement, HtmlImageElement, HtmlInputElement, MouseEvent,
 };
 
-use crate::board::{Board, convert_to_index};
+use crate::board::{convert_to_index, Board};
 use crate::color::*;
-use crate::moves::Move;
+use crate::moves::{get_next_move, GameResult, Move};
+use crate::piece::Piece;
 use crate::position::Position;
 
 #[macro_export]
@@ -34,11 +35,11 @@ const PLAYERCOLOR: Color = Color::White;
 
 // Define a wrapper struct that holds the result
 pub struct MenuInteractionResult {
-    pub difficulty_value: u32,
+    pub difficulty_value: i32,
 }
 
 impl MenuInteractionResult {
-    fn new(difficulty_value: u32) -> Self {
+    fn new(difficulty_value: i32) -> Self {
         Self { difficulty_value }
     }
 }
@@ -88,7 +89,7 @@ fn hide_menu() {
         .expect("Failed to hide menu");
 }
 
-fn get_selected_difficulty_value() -> u32 {
+fn get_selected_difficulty_value() -> i32 {
     let difficulty_inputs = vec!["easy", "normal", "hard"];
     let document = web_sys::window()
         .expect("Window not found")
@@ -334,94 +335,16 @@ pub async fn get_selected_square() -> Result<Position, &'static str> {
     position
 }
 
-// pub async fn get_selected_piece() -> Result<Position, &'static str> {
-//     let (sender, receiver) = futures::channel::oneshot::channel();
-//     let sender = Rc::new(RefCell::new(Some(sender)));
-
-//     let closure = Closure::wrap(Box::new(move |event: Event| {
-//         IS_SELECTING.with(|is_selecting| {
-//             if !is_selecting.get() {
-//                 is_selecting.set(true);
-
-//                 let mouse_event = event.dyn_into::<MouseEvent>().unwrap();
-//                 let target = mouse_event.target().unwrap();
-
-//                 if let Some(image) = target.dyn_ref::<HtmlImageElement>() {
-//                     let square = image
-//                         .parent_element()
-//                         .expect("Failed to get parent element")
-//                         .dyn_into::<HtmlElement>()
-//                         .expect("Failed to cast parent element into an Element");
-
-//                     let i = square
-//                         .get_attribute("data-i")
-//                         .and_then(|i| i.parse::<i32>().ok());
-//                     let j = square
-//                         .get_attribute("data-j")
-//                         .and_then(|j| j.parse::<i32>().ok());
-//                     let k = square
-//                         .get_attribute("data-k")
-//                         .and_then(|k| k.parse::<i32>().ok());
-
-//                     match (i, j, k) {
-//                         (Some(i), Some(j), Some(k)) => {
-//                             let position = Position::new(i, j, k);
-//                             if let Some(sender) = sender.borrow_mut().take() {
-//                                 sender.send(Ok(position)).unwrap();
-//                             }
-//                         }
-//                         _ => {
-//                             if let Some(sender) = sender.borrow_mut().take() {
-//                                 sender.send(Err("Invalid square")).unwrap();
-//                             }
-//                         }
-//                     }
-//                 }
-
-//                 is_selecting.set(false);
-//             }
-//         });
-//     }) as Box<dyn FnMut(_)>);
-
-//     let window = web_sys::window().expect("no global `window` exists");
-//     let document = window.document().expect("should have a document on window");
-//     let pieces = document.query_selector_all(".piece").unwrap();
-
-//     for i in 0..pieces.length() {
-//         if let Some(piece) = pieces.item(i) {
-//             piece
-//                 .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
-//                 .unwrap();
-//         }
-//     }
-
-//     let position = receiver.await.unwrap();
-
-//     for i in 0..pieces.length() {
-//         if let Some(piece) = pieces.item(i) {
-//             piece
-//                 .remove_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
-//                 .unwrap();
-//         }
-//     }
-
-//     closure.forget();
-
-//     position
-// }
-
-
 pub fn get_hint_pos(board: &Board, pos: Position) -> Vec<Position> {
     let mut result: Vec<Position> = Vec::new();
     if let Some(piece) = board.get_piece(pos) {
         let moves = piece.get_legal_moves(board);
-        log!("{:?}", moves);
         for m in moves {
             match m {
                 Move::Piece(_, to) | Move::Promotion(_, to, _) => {
                     result.push(to);
                 }
-                _ => {},
+                _ => {}
             }
         }
     }
@@ -466,28 +389,109 @@ pub fn update_hint_squares(hint_pos: Vec<Position>) {
     }
 }
 
-pub fn render_loop(board: Rc<RefCell<Board>>) {
+pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
     let mut board_clone = Rc::clone(&board);
 
-    // Selecting the piece the user wants to move
-    let first_selected_square_future = get_selected_square();
+    if board.borrow().get_turn_color() == PLAYERCOLOR {
+        // Selecting the piece the user wants to move
+        let first_selected_square_future = get_selected_square();
 
-    wasm_bindgen_futures::spawn_local(async move {
-        let first_selected_square = first_selected_square_future.await;
-        log!("{:?}", first_selected_square);
-        match first_selected_square {
-            Ok(first_square) => {
-                let from = first_square;
-                let hint_position = get_hint_pos(&board.borrow(), from);
-                if !hint_position.is_empty() {
-                    update_hint_squares(hint_position);
+        wasm_bindgen_futures::spawn_local(async move {
+            let first_selected_square = first_selected_square_future.await;
+
+            match first_selected_square {
+                Ok(first_square) => {
+                    let from = first_square;
+                    // Get the hint squares
+                    let hint_position = get_hint_pos(&board.borrow(), from);
+                    if !hint_position.is_empty() {
+                        update_hint_squares(hint_position);
+                    }
+
+                    // Wait for the user to select the second square
+                    let second_selected_square = get_selected_square().await;
+
+                    match second_selected_square {
+                        Ok(second_square) => {
+                            update_board(&board_clone.borrow(), false);
+
+                            let to = second_square;
+
+                            // Need to update the promotion feature
+                            let m = match board.borrow().get_piece(from) {
+                                Some(Piece::Pawn(_, _)) => Move::Piece(from, to),
+                                _ => Move::Piece(from, to),
+                            };
+
+                            match board.borrow_mut().play_move(m) {
+                                GameResult::Continuing(next_board) => {
+                                    log!("Continuing");
+                                    board_clone = Rc::new(RefCell::new(next_board));
+                                }
+
+                                GameResult::Victory(next_board, _) => {
+                                    log!("You won the game!");
+                                    board_clone = Rc::new(RefCell::new(next_board));
+                                    update_board(&board_clone.borrow(), false);
+                                    return;
+                                }
+
+                                GameResult::Stalemate(next_board) => {
+                                    log!("Drawn Game");
+                                    board_clone = Rc::new(RefCell::new(next_board));
+                                    update_board(&board_clone.borrow(), false);
+                                    return;
+                                }
+
+                                GameResult::IllegalMove(_) => {
+                                    log!("IllegalMove");
+                                }
+                            }
+                        }
+
+                        Err(err) => {
+                            log!("Error selecting second square: {}", err);
+                        }
+                    }
+                }
+
+                Err(err) => {
+                    log!("Error selecting first square: {}", err);
                 }
             }
 
-            Err(err) => {
-                log!("Error: {}" ,err);
-            },
+            update_board(&board_clone.borrow(), false);
+            render_loop(Rc::clone(&board_clone), difficulty)
+        });
+    } else {
+        // Computer makes decisions
+        let m = get_next_move(&board.borrow(), difficulty);
+
+        match board.borrow_mut().play_move(m) {
+            GameResult::Continuing(next_board) => {
+                log!("Continuing");
+                board_clone = Rc::new(RefCell::new(next_board));
+            }
+
+            GameResult::Victory(next_board, _) => {
+                log!("You lost the game!");
+                board_clone = Rc::new(RefCell::new(next_board));
+                update_board(&board_clone.borrow(), false);
+                return;
+            }
+
+            GameResult::Stalemate(next_board) => {
+                log!("Drawn Game");
+                board_clone = Rc::new(RefCell::new(next_board));
+                update_board(&board_clone.borrow(), false);
+                return;
+            }
+
+            GameResult::IllegalMove(_) => {
+                log!("IllegalMove");
+            }
         }
-        render_loop(Rc::clone(&board_clone))
-    });
+        update_board(&board_clone.borrow(), false);
+        render_loop(Rc::clone(&board_clone), difficulty);
+    }
 }

@@ -15,7 +15,6 @@ pub enum Piece {
     Pawn(Color, Position),
 }
 
-#[allow(unused)]
 impl Piece {
     pub fn get_type(&self) -> &str {
         match self {
@@ -143,25 +142,25 @@ impl Piece {
         matches!(self, Self::King(_, _))
     }
 
-    pub fn is_queen(&self) -> bool {
-        matches!(self, Self::Queen(_, _))
-    }
+    // pub fn is_queen(&self) -> bool {
+    //     matches!(self, Self::Queen(_, _))
+    // }
 
-    pub fn is_unicorn(&self) -> bool {
-        matches!(self, Self::Unicorn(_, _))
-    }
+    // pub fn is_unicorn(&self) -> bool {
+    //     matches!(self, Self::Unicorn(_, _))
+    // }
 
-    pub fn is_rook(&self) -> bool {
-        matches!(self, Self::Rook(_, _))
-    }
+    // pub fn is_rook(&self) -> bool {
+    //     matches!(self, Self::Rook(_, _))
+    // }
 
-    pub fn is_bishop(&self) -> bool {
-        matches!(self, Self::Bishop(_, _))
-    }
+    // pub fn is_bishop(&self) -> bool {
+    //     matches!(self, Self::Bishop(_, _))
+    // }
 
-    pub fn is_knight(&self) -> bool {
-        matches!(self, Self::Knight(_, _))
-    }
+    // pub fn is_knight(&self) -> bool {
+    //     matches!(self, Self::Knight(_, _))
+    // }
 
     pub fn is_pawn(&self) -> bool {
         matches!(self, Self::Pawn(_, _))
@@ -292,19 +291,19 @@ impl Piece {
 
             Self::Rook(ally_color, pos) => {
                 for lvl in 0..5 {
-                    let new_pos = Position::new(lvl, pos.get_row(), pos.get_col());
+                    let new_pos = Position::new(pos.get_row(), pos.get_col(), lvl);
                     if new_pos != pos && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
                 }
                 for row in 0..5 {
-                    let new_pos = Position::new(pos.get_lvl(), row, pos.get_col());
+                    let new_pos = Position::new(row, pos.get_col(), pos.get_lvl());
                     if new_pos != pos && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
                 }
                 for col in 0..5 {
-                    let new_pos = Position::new(pos.get_lvl(), pos.get_row(), col);
+                    let new_pos = Position::new(pos.get_row(), col, pos.get_lvl(), );
                     if new_pos != pos && !board.has_ally_piece(new_pos, ally_color) {
                         result.push(Move::Piece(pos, new_pos));
                     }
@@ -314,7 +313,7 @@ impl Piece {
             Self::Bishop(ally_color, pos) => {
                 for lvl in 0..5 {
                     for row in 0..5 {
-                        let new_pos = Position::new(lvl, row, pos.get_col());
+                        let new_pos = Position::new(row, pos.get_col(), lvl);
                         if new_pos != pos
                             && !board.has_ally_piece(new_pos, ally_color)
                             && new_pos.is_diagonal_to(pos)
@@ -325,7 +324,7 @@ impl Piece {
                 }
                 for lvl in 0..5 {
                     for col in 0..5 {
-                        let new_pos = Position::new(lvl, pos.get_row(), col);
+                        let new_pos = Position::new(pos.get_row(), col, lvl);
                         if new_pos != pos
                             && !board.has_ally_piece(new_pos, ally_color)
                             && new_pos.is_diagonal_to(pos)
@@ -336,7 +335,7 @@ impl Piece {
                 }
                 for row in 0..5 {
                     for col in 0..5 {
-                        let new_pos = Position::new(pos.get_lvl(), row, col);
+                        let new_pos = Position::new(row, col, pos.get_lvl());
                         if new_pos != pos
                             && !board.has_ally_piece(new_pos, ally_color)
                             && new_pos.is_diagonal_to(pos)
@@ -354,7 +353,7 @@ impl Piece {
                             if (dlvl.abs() + drow.abs() + dcol.abs() == 3)
                                 && (dlvl.abs() == 2 || drow.abs() == 2 || dcol.abs() == 2)
                             {
-                                let new_pos = pos.next_by(dlvl, drow, dcol);
+                                let new_pos = pos.next_by(drow, dcol, dlvl);
                                 if new_pos.is_on_board() 
                                     && !board.has_ally_piece(new_pos, ally_color)
                                 {

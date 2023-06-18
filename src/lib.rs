@@ -37,12 +37,12 @@ pub async fn run() -> Result<(), JsValue> {
     let board = Rc::new(RefCell::new(Board::new()));
     let menu_interaction_result = setup_menu_interaction().await;
     let difficulty = menu_interaction_result.difficulty_value;
-    log!("d: {}" ,difficulty);
     create_boards();
 
-    update_board(&board.borrow(), false);
+    // It is the only time that initial is true
+    update_board(&board.borrow(), true);
     
-    render_loop(Rc::clone(&board));
+    render_loop(Rc::clone(&board), difficulty);
     Ok(())
 }
 

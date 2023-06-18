@@ -110,7 +110,6 @@ impl Evaluate for Board {
     }
 }
 
-#[allow(unused)]
 impl Board {
     pub fn new() -> Board {
         BoardBuilder::new()
@@ -239,7 +238,7 @@ impl Board {
                     continue;
                 }
                 if piece.is_legal_move(pos, self) {
-                    return false;
+                    return true;
                 }
             }
         }
