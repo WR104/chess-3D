@@ -31,11 +31,11 @@ impl Piece {
     pub fn get_piece_value(&self) -> i32 {
         match self {
             Self::King(_, _) => 9999,
-            Self::Queen(_, _) => 9,
-            Self::Unicorn(_, _) => 5,
-            Self::Rook(_, _) => 5,
-            Self::Bishop(_, _) => 3,
-            Self::Knight(_, _) => 3,
+            Self::Queen(_, _) => 10,
+            Self::Unicorn(_, _) => 6,
+            Self::Rook(_, _) => 3,
+            Self::Bishop(_, _) => 4,
+            Self::Knight(_, _) => 4,
             Self::Pawn(_, _) => 1,
         }
     }
@@ -182,10 +182,10 @@ impl Piece {
         match *self {
             Self::Pawn(ally_color, pos) => {
                 let frontward = pos.pawn_forward(ally_color);
-                let upward = pos.pawn_vertical(ally_color);
+                let vertical = pos.pawn_vertical(ally_color);
                 let (row, _, lvl) = self.get_pos().get_all();
 
-                for new_pos in &[frontward, upward] {
+                for new_pos in &[frontward, vertical] {
                     if new_pos.is_on_board() && !board.has_piece(*new_pos) {
                         if lvl == 4 && row == 4 || lvl == 0 && row == 0 {
                             result.push(Move::Promotion(pos, *new_pos, Piece::Queen(self.get_color(), *new_pos)));
@@ -198,10 +198,10 @@ impl Piece {
                 for new_pos in &[
                     frontward.next_left(),
                     frontward.next_right(),
-                    upward.next_left(),
-                    upward.next_right(),
+                    vertical.next_left(),
+                    vertical.next_right(),
                 ] {
-                    if new_pos.is_on_board() && !board.has_piece(*new_pos) {
+                    if new_pos.is_on_board() && board.has_enemy_piece(*new_pos, ally_color) {
                         if lvl == 4 && row == 4 || lvl == 0 && row == 0 {
                             result.push(Move::Promotion(pos, *new_pos, Piece::Queen(self.get_color(), *new_pos)));
                         } else {
