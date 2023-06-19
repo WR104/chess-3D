@@ -238,8 +238,8 @@ pub fn update_board(board: &Board, initial: bool) {
             img.set_attribute("class", "piece")
                 .expect("failed to set class attribute");
 
-            if chess_id == "wK" && PLAYERCOLOR == WHITE 
-                || chess_id == "bK" && PLAYERCOLOR == BLACK {
+            if chess_id == "wK" && PLAYERCOLOR == WHITE || chess_id == "bK" && PLAYERCOLOR == BLACK
+            {
                 if board.is_in_check(PLAYERCOLOR) {
                     img.set_attribute("id", "checked")
                         .expect("failed to set id attribute");
@@ -253,7 +253,7 @@ pub fn update_board(board: &Board, initial: bool) {
                     .expect("failed to set animation property");
                 delay += 0.1;
             }
-            
+
             square_element
                 .append_child(&img)
                 .expect("failed to append child");
@@ -396,6 +396,17 @@ pub fn update_hint_squares(hint_pos: Vec<Position>) {
     }
 }
 
+pub fn update_status(str1: &str, str2: &str) {
+    let window = window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let status = document
+        .get_element_by_id("status")
+        .expect("should have status in document");
+
+    let new_status = format!("{} <br> {}", str1, str2);
+    status.set_inner_html(&new_status);
+}
+
 pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
     let mut board_clone = Rc::clone(&board);
 
@@ -403,11 +414,18 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
         // Selecting the piece the user wants to move
         let first_selected_square_future = get_selected_square();
 
+
+
         wasm_bindgen_futures::spawn_local(async move {
             let first_selected_square = first_selected_square_future.await;
 
             match first_selected_square {
                 Ok(first_square) => {
+
+        // Convert the player turn to str, then update it
+        let color_str_ref: &str = &PLAYERCOLOR.to_string();
+        update_status(color_str_ref, "TO MOVE");
+
                     let from = first_square;
                     // Get the hint squares
                     let hint_position = get_hint_pos(&board.borrow(), from);
@@ -432,26 +450,25 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
 
                             match board.borrow_mut().play_move(m) {
                                 GameResult::Continuing(next_board) => {
-                                    log!("Continuing");
                                     board_clone = Rc::new(RefCell::new(next_board));
                                 }
 
                                 GameResult::Victory(next_board, _) => {
-                                    log!("You won the game!");
+                                    update_status("YOU", "WON!");
                                     board_clone = Rc::new(RefCell::new(next_board));
                                     update_board(&board_clone.borrow(), false);
                                     return;
                                 }
 
                                 GameResult::Stalemate(next_board) => {
-                                    log!("Drawn Game");
+                                    update_status("DRAWN", "GAME");
                                     board_clone = Rc::new(RefCell::new(next_board));
                                     update_board(&board_clone.borrow(), false);
                                     return;
                                 }
 
                                 GameResult::IllegalMove(_) => {
-                                    log!("IllegalMove");
+                                    update_status("ILLEGAL", "MOVE");
                                 }
                             }
                         }
@@ -471,31 +488,33 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
             render_loop(Rc::clone(&board_clone), difficulty)
         });
     } else {
+        // Convert the computer's turn to str, then update it
+        let color_str_ref: &str = &PLAYERCOLOR.to_string();
+        update_status(color_str_ref, "TO MOVE");
+
         // Computer makes decisions
         let m = get_next_move(&board.borrow(), difficulty);
 
         match board.borrow_mut().play_move(m) {
             GameResult::Continuing(next_board) => {
-                log!("Continuing");
                 board_clone = Rc::new(RefCell::new(next_board));
             }
 
             GameResult::Victory(next_board, _) => {
-                log!("You lost the game!");
+                update_status("YOU", "LOST!");
                 board_clone = Rc::new(RefCell::new(next_board));
                 update_board(&board_clone.borrow(), false);
                 return;
             }
 
             GameResult::Stalemate(next_board) => {
-                log!("Drawn Game");
+                update_status("DRAWN", "GAME");
                 board_clone = Rc::new(RefCell::new(next_board));
                 update_board(&board_clone.borrow(), false);
                 return;
             }
 
             GameResult::IllegalMove(_) => {
-                log!("IllegalMove");
             }
         }
         update_board(&board_clone.borrow(), false);
