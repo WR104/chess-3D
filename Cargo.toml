@@ -26,6 +26,7 @@ version = "0.3.63"
 features = [
   "console",
   "Window",
+  "Screen",
   "Document",
   "Element",
   "HtmlCollection",
@@ -34,5 +35,8 @@ features = [
   "NodeList",
   "MouseEvent",
   "CssStyleDeclaration",
-  "HtmlInputElement"
+  "HtmlInputElement",
+  "HtmlTableElement",
+  "HtmlTableSectionElement",
+  "HtmlTableRowElement"
 ]
