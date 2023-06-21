@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is a 3D chess game variant called Raumschach, implemented using Rust with WebAssembly (wasm), HTML, CSS, and JavaScript. The game features three difficulty modes, move highlighting, move history tracking, captured pieces display, and evaluation of the game state. The chess AI utilizes the minimax algorithm with alpha-beta pruning for optimization. The user interface (UI) for the game is based on the one available in the following repository: https://github.com/edweenie123/3D-Chess. However, all the game logic and AI functionality have been implemented in Rust.
+This project is a 3D chess game variant called Raumschach, implemented using Rust with WebAssembly (wasm), HTML, CSS, and JavaScript. The game features three difficulty modes, move highlighting, move history tracking, captured pieces display, and evaluation of the game state. The chess AI utilizes the minimax algorithm with alpha-beta pruning for optimization. The user interface (UI) for the game is based on the one available in the following [repository](https://github.com/edweenie123/3D-Chess). However, all the game logic and AI functionality have been implemented in Rust.
 
 Play the game at: https://mikej.site/chess-3D/
 
