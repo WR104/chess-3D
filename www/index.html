@@ -65,21 +65,65 @@
             </div>
 
             <center style="margin-top: 4vh;">
-            <table>
-                <tr>
-                    <td><a class="menuButton" id="submitButton">Play&nbsp ▶</a></td>
-                    <td><a class="menuButton" id="rule" href="https://www.chessvariants.com/3d.dir/3d5.html">&nbsp Rules &nbsp</a></td>
-                </tr>
-            </table></center>
+                <table>
+                    <tr>
+                        <td><a class="menuButton" id="submitButton">Play&nbsp ▶</a></td>
+                        <td><a class="menuButton" id="rule" href="https://www.chessvariants.com/3d.dir/3d5.html">&nbsp
+                                Rules &nbsp</a></td>
+                    </tr>
+                </table>
+            </center>
         </div>
     </div>
+
+    <!-- Chess Boards -->
     <center>
         <div class="board-container">
         </div>
     </center>
 
+    <!-- Game status -->
     <div id="statusContainer">
         <p id="status"></p>
+    </div>
+
+    <!-- Moves history-->
+    <div id="movesPanel">
+        <table id="movesBox">
+            <tbody>
+                <tr>
+                    <th>White's moves</th>
+                    <th>Black's moves</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Catched pieces-->
+    <div id="catchPanel">
+        <div id="playerCatch">
+            <p>Player</p>
+            <div class="catchBox"></div>
+        </div>
+        <div id="computerCatch">
+            <p>Computer</p>
+            <div class="catchBox"></div>
+        </div>
+    </div>
+
+    <div id="evalBar">
+        <div id="rate" style="width: 50%;">
+            <p id="score">
+                <b>EVAL</b>
+                0.00
+            </p>
+        </div>
+    </div>
+
+    <div id="playAgain">
+        <a class="playAgainButton" onclick="location.reload()">
+            New Game
+        </a>
     </div>
     <script src="./bootstrap.js"></script>
 </body>

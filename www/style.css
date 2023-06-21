@@ -91,7 +91,7 @@ h4 {
     border-radius: 5px;
     text-decoration: none;
     transition: all 0.15s ease-out;
-    font-size: 1.2rem;
+    font-size: 1rem;
     display: block;
 }
 
@@ -293,6 +293,145 @@ h4 {
     opacity: 0.5;
 }
 
+/* Move history panel */
+#movesPanel {
+    display: none;
+	height: 50vh;
+	width: 20vw;
+	top: 2vh;
+	right: 0px;
+    z-index: 10;
+	position: fixed;
+	overflow-y: auto;
+    background-color: rgb(56, 56, 56, 0.5);
+    border-radius: 0.5em 0 0 0.5em;
+    -webkit-box-shadow: 8px 5px 23px -1px #000000; 
+    box-shadow: 8px 5px 23px -1px #000000;
+}
+
+/* Move history table */
+#movesBox {
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#movesBox th {
+    position: -webkit-sticky;
+    position: sticky;
+    text-align: center;
+    top: 0;
+    padding: 1px;
+    font-size: 1vw;
+    background-color: #0f0f0f;
+    color: rgb(221, 221, 221, 0.75);
+    z-index: 10;
+    padding: 0.3em 0;
+}
+
+#movesBox img {
+	padding: 1px;
+    width: 30px;
+    transform: translateY(5px);
+    -webkit-transform: translateY(5px);
+    margin-left: 2em;
+}
+
+/* Move history scroll bar */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.397);
+}
+
+/* Catched pieces */
+#catchPanel {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: 40vmin;
+    background-color:#363434c0;
+    border-radius: 0 1vmin 0 0;
+    -webkit-box-shadow: 3px 5px 23px -6px #000000; 
+    box-shadow: 3px 5px 23px -6px #000000;
+}
+
+#catchPanel p {
+    padding: 0;
+    margin: 0;
+}
+
+#playerCatch, #computerCatch {
+    margin: 20px;
+}
+
+.catchBox {
+    display: flex;
+    margin-left: -0.3vw;
+    height: 3.3vh;
+    width: auto;
+}
+
+/* evaluation bar CSS */
+#evalBar {
+    position: fixed;
+    height: 3vh;
+    width: 20vw;
+    top: 2vh;
+    left: 1vw;
+    border: 2px solid #dbdbdb;
+    background-color: #171717;
+    transition: all 0.2s ease-out;
+}
+
+#rate {
+    height: 3vh;
+    width: 50%;
+    background-color: #dbdbdb;
+    transition: all 0.2s ease-out;
+}
+
+#rate p {
+    color: #dbdbdb;
+    mix-blend-mode: difference;
+    margin: 0;
+    padding-left: 0.5em;
+    line-height: calc(3vh + 2px);
+    font-weight: 300;
+    position: fixed;
+}
+
+#playAgain {
+    position: fixed;
+    display: none;
+    top: 7vh;
+    left: 1vw;
+}
+
+.playAgainButton {
+    margin: 0;
+    padding: 0.5vh 2vw;
+    background-color: #292929;
+    color: #FFFFFF;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.15s ease-out;
+}
+
+.playAgainButton:hover{
+    cursor: pointer;
+    color: #292929;
+    background-color: #E6E6E6;
+}
+
 /* Radio Buttons CSS */
 [type=radio] {
     /* Hide the actual radio button, replaced with the pictures */
@@ -373,4 +512,7 @@ h4 {
         display: none;
     }
 
+    #score {
+        display: none;
+    }
 }
