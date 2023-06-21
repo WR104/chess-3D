@@ -3,6 +3,10 @@ name = "chess3d"
 version = "0.1.0"
 authors = ["WR104 <jzhehyu3@gmail.com>"]
 edition = "2018"
+description = "A 3D chess game"
+repository = "https://github.com/WR104/chess-3D/tree/main"
+license = "MIT"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -40,3 +44,8 @@ features = [
   "HtmlTableSectionElement",
   "HtmlTableRowElement"
 ]
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+lto = true
+opt-level = "s"
