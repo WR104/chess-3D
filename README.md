@@ -1,10 +1,11 @@
 # chess-3D github page
 
 ```
+Built at: 2023/06/21 02:17:38
                            Asset       Size  Chunks                         Chunk Names
-                  0.bootstrap.js   44.7 KiB       0  [emitted]
+                  0.bootstrap.js     55 KiB       0  [emitted]
                   1.bootstrap.js  442 bytes       1  [emitted]
-9dc7a21c98ec3929c2d8.module.wasm    118 KiB       0  [emitted] [immutable]
-                    bootstrap.js   21.7 KiB    main  [emitted]              main
-                      index.html   2.83 KiB          [emitted]
+ae0f8ab4f4c593659c99.module.wasm    122 KiB       0  [emitted] [immutable]
+                    bootstrap.js     25 KiB    main  [emitted]              main
+                      index.html   3.89 KiB          [emitted]
 ```
