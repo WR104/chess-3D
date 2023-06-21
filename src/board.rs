@@ -4,6 +4,7 @@ use crate::piece::Piece;
 use crate::position::Position;
 use crate::square::{Square, EMPTY_SQUARE};
 
+#[allow(unused_imports)]
 use crate::log;
 
 const SQUARES_NUM: usize = 5 * 5 * 5;
@@ -148,8 +149,25 @@ impl Board {
         }
     }
 
-    pub fn rating_value(&self) -> f64 {
-        todo!()
+    // Evaluation for player
+    pub fn eval_value(&self, player_color: Color) -> f64 {
+        let mut player_value :f64= 0.0;
+        let mut computer_value: f64 = 0.0;
+        for (_, square) in self.squares.iter().enumerate() {   
+            if let Some(piece) = square.get_piece() {
+                // king is not involved in evaluation
+                if piece.get_type() == "K" {
+                    continue;
+                }
+                let eval_value:f64 = piece.get_weighted_value();
+                if piece.get_color() == player_color {
+                    player_value += eval_value;
+                } else {
+                    computer_value += eval_value;
+                }
+            }
+        }
+        player_value / (computer_value + player_value) * 100.0
     }
 
     pub fn get_turn_color(&self) -> Color {
@@ -160,10 +178,6 @@ impl Board {
         let mut result = *self;
         result.turn = color;
         result
-    }
-
-    pub fn get_material_advantage(&self, color: Color) -> i32 {
-        todo!()
     }
 
     fn get_square(&mut self, pos: Position) -> &mut Square {

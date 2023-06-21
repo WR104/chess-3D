@@ -4,7 +4,8 @@ use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    window, Element, Event, HtmlElement, HtmlImageElement, HtmlInputElement, MouseEvent,
+    window, Element, Event, HtmlElement, HtmlImageElement, HtmlInputElement,
+    HtmlTableElement, HtmlTableRowElement, HtmlTableSectionElement, MouseEvent, Screen,
 };
 
 use crate::board::{convert_to_index, Board};
@@ -30,6 +31,7 @@ const COL: usize = 5;
 const LVL: usize = 5;
 const SQSIZE: usize = 6; //Square Size (vh)
 const PLAYERCOLOR: Color = Color::White;
+const MINSCREENWIDTH: i32 = 600; // Minimal screen width
 
 // Define a wrapper struct that holds the result
 pub struct MenuInteractionResult {
@@ -48,6 +50,51 @@ impl MenuInteractionResult {
 pub async fn setup_menu_interaction() -> MenuInteractionResult {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
+    let screen = window.screen().unwrap().dyn_into::<Screen>().unwrap();
+    let screen_width = screen.width().unwrap();
+
+    // The screen is too small to display long contents
+    if screen_width <= MINSCREENWIDTH {
+        // Change the mode content
+        let mode_container = document
+            .get_elements_by_class_name("modeContainer")
+            .item(0)
+            .expect("failed to get modeContainer");
+
+        let h4_elements = mode_container
+            .query_selector_all("h4")
+            .expect("failed to execute querySelectorAll");
+
+        h4_elements
+            .item(0)
+            .expect("no item 0")
+            .dyn_into::<HtmlElement>()
+            .expect("failed to cast to HTmlElement")
+            .set_text_content(Some("Easy"));
+
+        h4_elements
+            .item(1)
+            .expect("no item 1")
+            .dyn_into::<HtmlElement>()
+            .expect("failed to cast to HTmlElement")
+            .set_text_content(Some("Normal"));
+
+        h4_elements
+            .item(2)
+            .expect("no item 2")
+            .dyn_into::<HtmlElement>()
+            .expect("failed to cast to HTmlElement")
+            .set_text_content(Some("Hard"));
+
+        // Change the button content
+        let button_element = document
+            .get_element_by_id("submitButton")
+            .expect("failed to get submitButton")
+            .dyn_into::<HtmlElement>()
+            .expect("failed to cast to HtmlElement");
+        button_element
+            .set_text_content(Some(&format!("Play\u{00A0}\u{25B6}")));
+    }
 
     let submit_button = document
         .get_element_by_id("submitButton")
@@ -195,6 +242,7 @@ pub fn create_boards() {
 pub fn create_piece_image(id: &str) -> HtmlImageElement {
     let window = window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
+
     let img = document
         .create_element("img")
         .expect("failed to create element")
@@ -246,12 +294,65 @@ pub fn update_board(board: &Board, initial: bool) {
                 }
             }
 
-            // If this is the frist time, then apply fadeIn animation for each piece
+            // Turn on every module if the screen size is allowed
             if initial {
+                let screen = window.screen().unwrap().dyn_into::<Screen>().unwrap();
+                let screen_width = screen.width().unwrap();
+
+                // Animation for every piece
                 img.style()
                     .set_property("animation", &format!("fadeIn 1s ease {}s both", delay))
                     .expect("failed to set animation property");
+                // Delay in animation showing piece
                 delay += 0.1;
+
+                // Display the play again button
+                let button = document
+                    .get_element_by_id("playAgain")
+                    .expect("failed to get playAgain")
+                    .dyn_into::<HtmlElement>()
+                    .expect("failed to cast to HtmlElement");
+                button
+                    .style()
+                    .set_property("display", "block")
+                    .expect("failed to set property display");
+
+                // minimum screen size
+                if screen_width >= MINSCREENWIDTH {
+                    // Display the moves history panel
+                    let moves_panel = document
+                        .get_element_by_id("movesPanel")
+                        .expect("failed to get movesPanel")
+                        .dyn_into::<HtmlElement>()
+                        .expect("failed to cast to HtmlElement");
+                    moves_panel
+                        .style()
+                        .set_property("display", "block")
+                        .expect("failed to set property display");
+
+                    // Diplay the catch Panel
+                    let catch_panel = document
+                        .get_element_by_id("catchPanel")
+                        .expect("failed to get catchPanel")
+                        .dyn_into::<HtmlElement>()
+                        .expect("failed to cast to HtmlElement");
+                    catch_panel
+                        .style()
+                        .set_property("display", "block")
+                        .expect("failed to set property display");
+                } else {
+                    // Turn of the status
+                    let status = document
+                        .get_element_by_id("statusContainer")
+                        .expect("should have status in document")
+                        .dyn_into::<HtmlElement>()
+                        .expect("failed to cast to HtmlElemet");
+
+                    status
+                        .style()
+                        .set_property("display", "none")
+                        .expect("failed to set display property");
+                }
             }
 
             square_element
@@ -407,6 +508,146 @@ pub fn update_status(str1: &str, str2: &str) {
     status.set_inner_html(&new_status);
 }
 
+pub fn get_chess_id(piece: Piece) -> String {
+    let chess_color = match piece.get_color() {
+        WHITE => "w",
+        BLACK => "b",
+    };
+    let chess_type = piece.get_type();
+    let chess_id = format!("{}{}", chess_color, chess_type);
+    chess_id
+}
+
+pub fn update_moves_history(piece: Option<Piece>, m: &str) {
+    if let Some(piece) = piece {
+        let window = window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let table = document
+            .get_element_by_id("movesBox")
+            .expect("shuold have movesBox on document")
+            .dyn_into::<HtmlTableElement>()
+            .expect("failed to cast Element to HtmlTableElement");
+        let tbody = table
+            .t_bodies()
+            .item(0)
+            .unwrap()
+            .dyn_into::<HtmlTableSectionElement>()
+            .expect("failed to cast HtmlTableElement to HtmlTableSectionElement");
+
+        let mut row_to_update = None;
+        for i in 0..tbody.rows().length() {
+            let row = tbody
+                .rows()
+                .item(i)
+                .unwrap()
+                .dyn_into::<HtmlTableRowElement>()
+                .expect("failed to cast Element to HtmlTableRowElement");
+            if row.cells().length() == 1 {
+                row_to_update = Some(row);
+                break;
+            }
+        }
+
+        // Moves history displayed by pairs
+        let row_to_update = match row_to_update {
+            Some(row) => row,
+            None => {
+                let new_row = document
+                    .create_element("tr")
+                    .expect("failed to create tr")
+                    .dyn_into::<HtmlTableRowElement>()
+                    .expect("failed to cast Element to HtmlTableRowElement");
+                tbody.append_child(&new_row).expect("failed to append tr");
+                new_row
+            }
+        };
+
+        let new_cell = document.create_element("td").expect("failed to create td");
+
+        let chess_id = get_chess_id(piece);
+        let img = create_piece_image(&chess_id);
+
+        new_cell.append_child(&img).expect("failed to append child");
+        new_cell.set_inner_html(&format!("{} {}", new_cell.inner_html(), m));
+
+        row_to_update
+            .append_child(&new_cell)
+            .expect("failed to append child");
+    }
+}
+
+pub fn update_catch_piece(piece: Option<Piece>, player: bool) {
+    if let Some(piece) = piece {
+        let window = window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+
+        let catch_id = if player {
+            "playerCatch"
+        } else {
+            "computerCatch"
+        };
+        let catch_target = document
+            .get_element_by_id(catch_id)
+            .expect("failed to get Element");
+        let catch_box = catch_target
+            .get_elements_by_class_name("catchBox")
+            .item(0)
+            .expect("failed to get catchBox");
+
+        let chess_type = piece.get_type();
+        let chess_id = get_chess_id(piece);
+        let img = create_piece_image(&chess_id);
+        img.set_attribute("chessType", &chess_type)
+            .expect("failed to set attribute chessType");
+
+        let existing_img = catch_box
+            .query_selector_all(&format!("[chessType='{}']", chess_type))
+            .expect("failed to excute querSelector");
+        let last_existing_img = existing_img.item(existing_img.length() - 1);
+
+        // Make the pieces with same types overlapping
+        if let Some(last_existing_img) = last_existing_img {
+            img.style()
+                .set_property("margin", "0px 0px 0px -25px")
+                .expect("failed to set property margin");
+
+            last_existing_img
+                .dyn_into::<Element>()
+                .expect("failed to cast to Element")
+                .insert_adjacent_element("afterend", &img)
+                .expect("failed to insert adjacent element");
+        } else {
+            catch_box
+                .append_child(&img)
+                .expect("failed to append child");
+        }
+    }
+}
+
+pub fn update_eval(rate: f64) {
+    let window = window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let rate_bar = document
+        .get_element_by_id("rate")
+        .expect("failed to get element rate")
+        .dyn_into::<HtmlElement>()
+        .expect("failed to cast to HtmlElement");
+
+    rate_bar
+        .style()
+        .set_property("width", &format!("{}%", &rate.to_string()))
+        .expect("failed to set property width");
+
+    // update the score
+    let score_element = document
+        .get_element_by_id("score")
+        .expect("failed to get score");
+    let score = (rate - 50.0) / 5.0;
+    let score = (score * 10.0).round().mul_add(0.1, 0.0);
+    score_element.set_inner_html(&format!("<b>EVAL</b> {:.2}", score));
+}
+
 pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
     let mut board_clone = Rc::clone(&board);
 
@@ -414,19 +655,18 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
         // Selecting the piece the user wants to move
         let first_selected_square_future = get_selected_square();
 
-
-
         wasm_bindgen_futures::spawn_local(async move {
             let first_selected_square = first_selected_square_future.await;
 
             match first_selected_square {
                 Ok(first_square) => {
-
-        // Convert the player turn to str, then update it
-        let color_str_ref: &str = &PLAYERCOLOR.to_string();
-        update_status(color_str_ref, "TO MOVE");
+                    // Convert the player turn to str, then update it
+                    let color_str_ref: &str = &PLAYERCOLOR.to_string();
+                    update_status(color_str_ref, "TO MOVE");
 
                     let from = first_square;
+                    let selected_piece = board.borrow().get_piece(from);
+
                     // Get the hint squares
                     let hint_position = get_hint_pos(&board.borrow(), from);
                     if !hint_position.is_empty() {
@@ -441,6 +681,8 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
                             update_board(&board_clone.borrow(), false);
 
                             let to = second_square;
+                            // Might catch a piece here
+                            let catched_piece = board.borrow().get_piece(to);
 
                             // Need to update the promotion feature
                             let m = match board.borrow().get_piece(from) {
@@ -451,6 +693,10 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
                             match board.borrow_mut().play_move(m) {
                                 GameResult::Continuing(next_board) => {
                                     board_clone = Rc::new(RefCell::new(next_board));
+                                    let rate = next_board.eval_value(PLAYERCOLOR);
+                                    update_eval(rate);
+                                    update_moves_history(selected_piece, &m.to_string());
+                                    update_catch_piece(catched_piece, true);
                                 }
 
                                 GameResult::Victory(next_board, _) => {
@@ -494,10 +740,22 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
 
         // Computer makes decisions
         let m = get_next_move(&board.borrow(), difficulty);
+        let (from, to) = match m {
+            Move::Piece(from, to) => (from, to),
+            Move::Promotion(from, to, _) => (from, to),
+            Move::Resign => (Position::new(6, 6, 6), Position::new(6, 6, 6)),
+        };
+        let moved_piece = board.borrow().get_piece(from);
+        // Might catch a piece here
+        let catched_piece = board.borrow().get_piece(to);
 
         match board.borrow_mut().play_move(m) {
             GameResult::Continuing(next_board) => {
                 board_clone = Rc::new(RefCell::new(next_board));
+                let rate = next_board.eval_value(PLAYERCOLOR);
+                update_eval(rate);
+                update_moves_history(moved_piece, &m.to_string());
+                update_catch_piece(catched_piece, false);
             }
 
             GameResult::Victory(next_board, _) => {
@@ -514,8 +772,7 @@ pub fn render_loop(board: Rc<RefCell<Board>>, difficulty: i32) {
                 return;
             }
 
-            GameResult::IllegalMove(_) => {
-            }
+            GameResult::IllegalMove(_) => {}
         }
         update_board(&board_clone.borrow(), false);
         render_loop(Rc::clone(&board_clone), difficulty);
